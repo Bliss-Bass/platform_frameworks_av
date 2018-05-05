@@ -3555,7 +3555,7 @@ uint32_t AudioPolicyManager::nextAudioPortGeneration()
 #ifdef USE_XML_AUDIO_POLICY_CONF
 // Treblized audio policy xml config will be located in /odm/etc or /vendor/etc.
 static const char *kConfigLocationList[] =
-        {"/odm/etc", "/vendor/etc", "/system/etc"};
+        {"/odm/etc", "/vendor/etc/audio", "/vendor/etc", "/system/etc"};
 static const int kConfigLocationListSize =
         (sizeof(kConfigLocationList) / sizeof(kConfigLocationList[0]));
 
@@ -4666,7 +4666,7 @@ void AudioPolicyManager::checkOutputForAllStrategies()
 void AudioPolicyManager::checkA2dpSuspend()
 {
     audio_io_handle_t a2dpOutput = mOutputs.getA2dpOutput();
-    if (a2dpOutput == 0) {
+    if (a2dpOutput == 0 || mOutputs.isA2dpOnPrimary()) {
         mA2dpSuspended = false;
         return;
     }

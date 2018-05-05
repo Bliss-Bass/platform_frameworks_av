@@ -452,9 +452,10 @@ binder::Status Camera2Client::disconnect() {
 
     ALOGV("Camera %d: Disconnecting device", mCameraId);
 
-    mDevice->disconnect();
-
-    mDevice.clear();
+    if (mDevice != nullptr) {
+        mDevice->disconnect();
+        mDevice.clear();
+    }
 
     CameraService::Client::disconnect();
 
@@ -906,6 +907,7 @@ void Camera2Client::stopPreview() {
     Mutex::Autolock icl(mBinderSerializationLock);
     status_t res;
     if ( (res = checkPid(__FUNCTION__) ) != OK) return;
+    if (mDevice == 0) return;
     stopPreviewL();
 }
 
@@ -1371,7 +1373,7 @@ status_t Camera2Client::cancelAutoFocus() {
     ALOGV("%s: Camera %d", __FUNCTION__, mCameraId);
     status_t res;
     if ( (res = checkPid(__FUNCTION__) ) != OK) return res;
-
+    if (mDevice == 0) return NO_INIT;
     int triggerId;
     {
         SharedParameters::Lock l(mParameters);
@@ -1738,8 +1740,6 @@ void Camera2Client::notifyError(int32_t errorCode,
             err = CAMERA_ERROR_RELEASED;
             break;
         case hardware::camera2::ICameraDeviceCallbacks::ERROR_CAMERA_DEVICE:
-            err = CAMERA_ERROR_UNKNOWN;
-            break;
         case hardware::camera2::ICameraDeviceCallbacks::ERROR_CAMERA_SERVICE:
             err = CAMERA_ERROR_SERVER_DIED;
             break;
